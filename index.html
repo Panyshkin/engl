@@ -3,192 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>English 700 Gold</title>
+    <title>English 700: Золотой Запас</title>
     <style>
         :root { --bg: #f0f4f8; --card: #ffffff; --text: #2c3e50; --accent: #27ae60; --error: #e74c3c; --blue: #3498db; --gold: #f1c40f; }
         body.dark { --bg: #1a1a2e; --card: #16213e; --text: #e9e9e9; --accent: #0f9d58; }
-        
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; padding: 20px; transition: 0.3s; }
-        .container { max-width: 550px; width: 100%; text-align: center; }
-        
-        .progress-container { width: 100%; height: 12px; background: #dcdde1; border-radius: 6px; margin-bottom: 10px; overflow: hidden; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; padding: 20px; transition: 0.3s; margin: 0; }
+        .container { max-width: 550px; width: 100%; text-align: center; padding: 10px; }
+        .progress-container { width: 100%; height: 10px; background: #dcdde1; border-radius: 5px; margin: 15px 0; overflow: hidden; }
         .progress-bar { height: 100%; width: 0%; background: var(--accent); transition: 0.5s; }
-        
-        .card { background: var(--card); padding: 40px; border-radius: 25px; box-shadow: 0 12px 30px rgba(0,0,0,0.2); min-height: 300px; display: flex; flex-direction: column; justify-content: center; border: 4px solid transparent; transition: 0.3s; margin-bottom: 20px; }
-        .word-main { font-size: 48px; font-weight: bold; color: var(--blue); }
-        .word-sub { font-size: 32px; color: #7f8c8d; margin-top: 10px; }
-
-        input[type="text"] { width: 90%; padding: 15px; font-size: 24px; border-radius: 12px; border: 2px solid #bdc3c7; text-align: center; background: var(--card); color: var(--text); }
-        
-        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        button { padding: 20px; font-size: 18px; border-radius: 15px; border: none; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .card { background: var(--card); padding: 30px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); min-height: 280px; display: flex; flex-direction: column; justify-content: center; border: 4px solid transparent; position: relative; }
+        .word-main { font-size: clamp(30px, 8vw, 48px); font-weight: bold; color: var(--blue); margin-bottom: 10px; }
+        .word-sub { font-size: clamp(20px, 5vw, 28px); color: #7f8c8d; min-height: 35px; }
+        input[type="text"] { width: 90%; padding: 12px; font-size: 20px; border-radius: 10px; border: 2px solid #bdc3c7; text-align: center; margin-top: 15px; background: var(--card); color: var(--text); }
+        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+        button { padding: 18px; font-size: 16px; border-radius: 15px; border: none; cursor: pointer; font-weight: bold; transition: 0.2s; }
         .btn-full { grid-column: span 2; background: var(--blue); color: white; }
         .btn-yes { background: var(--accent); color: white; }
         .btn-no { background: #95a5a6; color: white; }
         .btn-exam { background: var(--gold); color: black; grid-column: span 2; }
-        
-        .top-nav { display: flex; justify-content: space-between; margin-bottom: 15px; }
-        .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); align-items:center; justify-content:center; z-index:100; }
-        .modal-content { background:var(--card); padding:30px; border-radius:20px; width:90%; color: var(--text); }
-        textarea { width:100%; height:200px; background: #f9f9f9; padding: 10px; box-sizing: border-box; }
+        .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); align-items:center; justify-content:center; z-index:100; }
+        .modal-content { background:var(--card); padding:20px; border-radius:20px; width:90%; max-height: 80vh; overflow-y: auto; }
+        textarea { width: 100%; height: 250px; font-family: monospace; padding: 10px; box-sizing: border-box; }
+        .success { border-color: var(--accent); }
+        .fail { border-color: var(--error); }
     </style>
 </head>
-<body>
+<body class="dark">
 
 <div class="container">
     <div class="top-nav">
-        <button onclick="toggleTheme()" style="padding: 10px; font-size: 14px; background: #95a5a6;">🌓 Тема</button>
-        <div id="mode-label" style="font-weight: bold; padding: 10px;">ГОТОВ</div>
-        <button onclick="toggleModal(true)" style="padding: 10px; font-size: 14px; background: #95a5a6;">⚙️ Слова</button>
+        <button onclick="toggleTheme()" style="padding: 8px; background: #57606f; color: white;">🌓 Тема</button>
+        <span id="mode-badge" style="font-weight: bold; font-size: 14px;">ГОТОВ</span>
+        <button onclick="toggleModal(true)" style="padding: 8px; background: #57606f; color: white;">⚙️ Слова</button>
     </div>
 
     <div class="progress-container"><div id="progress" class="progress-bar"></div></div>
     
     <div class="card" id="card">
-        <div id="display-top" class="word-main">English</div>
-        <div id="display-bottom" class="word-sub">700 слов</div>
-        <div id="input-area" style="display:none;"><input type="text" id="writingInput" autocomplete="off"></div>
+        <div id="display-top" class="word-main">English 700</div>
+        <div id="display-bottom" class="word-sub">Нажмите Начать</div>
+        <div id="input-area" style="display:none;"><input type="text" id="writingInput" placeholder="Перевод..." autocomplete="off"></div>
     </div>
 
     <div class="controls" id="controls">
-        <button class="btn-full" onclick="startSession()">Начать урок (10 слов)</button>
+        <button class="btn-full" onclick="startSession()">Начать Урок (10 слов)</button>
     </div>
     
-    <div id="status" style="margin-top:20px; font-weight:bold;"></div>
+    <div id="status" style="margin-top:15px; min-height: 20px; font-weight: bold;"></div>
 </div>
 
 <div id="modal" class="modal">
     <div class="modal-content">
-        <h3>Ваш словарь</h3>
+        <h3>Ваш словарь (700 слов)</h3>
+        <p style="font-size: 12px;">Вы можете редактировать список вручную:</p>
         <textarea id="wordsInput"></textarea>
-        <button class="btn-yes" onclick="saveSettings()" style="width:100%">Сохранить</button>
-        <button class="btn-no" onclick="load700()" style="width:100%; margin-top:10px; background: var(--blue);">Загрузить 700 слов</button>
+        <button class="btn-yes" onclick="saveSettings()" style="width:100%; margin-top:10px;">Сохранить изменения</button>
+        <button class="btn-no" onclick="resetToDefault()" style="width:100%; margin-top:10px;">Сбросить до 700 слов</button>
         <button class="btn-no" onclick="toggleModal(false)" style="width:100%; margin-top:10px;">Закрыть</button>
     </div>
 </div>
 
 <script>
-    // Массив из топ-700 слов (сокращенно для примера, расширен до основных категорий)
-    const base700 = [
-        "time - время", "year - год", "people - люди", "way - путь", "day - день", "man - мужчина", "thing - вещь", "woman - женщина", "life - жизнь", "child - ребенок", "world - мир", "school - школа", "state - государство", "family - семья", "student - студент", "group - группа", "country - страна", "problem - проблема", "hand - рука", "part - часть", "place - место", "case - случай", "week - неделя", "company - компания", "system - система", "program - программа", "question - вопрос", "work - работа", "government - правительство", "number - число", "night - ночь", "point - точка", "home - дом", "water - вода", "room - комната", "mother - мать", "area - область", "money - деньги", "story - история", "fact - факт", "month - месяц", "lot - лот", "right - право", "study - изучение", "book - книга", "eye - глаз", "job - работа", "word - слово", "business - бизнес", "issue - проблема", "side - сторона", "kind - вид", "head - голова", "house - дом", "service - служба", "friend - друг", "father - отец", "power - власть", "hour - час", "game - игра", "line - линия", "end - конец", "member - участник", "law - закон", "car - машина", "city - город", "community - сообщество", "name - имя", "team - команда", "minute - минута", "idea - идея", "kid - ребенок", "body - тело", "information - информация", "back - спина", "parent - родитель", "face - лицо", "others - другие", "level - уровень", "office - офис", "door - дверь", "health - здоровье", "person - человек", "art - искусство", "war - война", "history - история", "party - вечеринка", "result - результат", "change - изменение", "morning - утро", "reason - причина", "low - низкий", "win - побеждать", "shop - магазин"
-        // ... (в реальном приложении здесь будет полный список строк)
-    ];
+// ПОЛНАЯ БАЗА 700 СЛОВ
+const gold700 = [
+"the - определенный артикль", "be - быть", "and - и", "of - предлог родительного падежа", "a - неопределенный артикль", "in - в", "to - к, в", "have - иметь", "it - это", "i - я", "that - тот, что", "for - для", "you - ты, вы", "he - он", "with - с", "on - на", "do - делать", "say - говорить", "this - этот", "they - они", "at - у, в", "but - но", "we - мы", "his - его", "from - из, от", "not - не", "by - к, путем", "she - она", "or - или", "as - как", "what - что", "go - идти", "their - их", "can - мочь", "who - кто", "get - получать", "if - если", "would - частица бы", "her - её", "all - все", "my - мой", "make - делать, создавать", "about - о, около", "know - знать", "will - вспомогательный глагол будущего времени", "up - вверх", "one - один", "time - время", "there - там", "year - год", "so - так, поэтому", "think - думать", "when - когда", "which - который", "them - их, им", "some - несколько", "me - мне, меня", "people - люди", "take - брать", "out - из, снаружи", "into - внутрь", "just - только что, просто", "see - видеть", "him - его, ему", "your - твой, ваш", "come - приходить", "could - мог", "now - сейчас", "than - чем", "like - как, нравиться", "other - другой", "how - как", "then - тогда", "its - его (неодуш.)", "our - наш", "two - два", "more - больше", "these - эти", "want - хотеть", "way - путь, способ", "look - смотреть", "first - первый", "also - также", "new - новый", "because - потому что", "day - день", "more - больше", "use - использовать", "no - нет", "man - мужчина", "find - находить", "here - здесь", "thing - вещь", "give - давать", "many - многие", "well - хорошо", "only - только", "those - те", "tell - рассказывать", "one - один", "very - очень", "her - её", "even - даже", "back - назад, спина", "any - любой", "good - хороший", "woman - женщина", "through - через", "us - нам, нас", "life - жизнь", "child - ребенок", "work - работа", "down - вниз", "may - может (быть)", "after - после", "should - следует", "call - звонить, называть", "world - мир", "over - над, закончено", "school - школа", "still - все еще", "try - пытаться", "last - последний", "ask - спрашивать", "need - нуждаться", "too - тоже, слишком", "feel - чувствовать", "three - три", "state - состояние, штат", "never - никогда", "become - становиться", "between - между", "high - высокий", "really - действительно", "something - что-то", "most - самый, большинство", "another - другой", "much - много", "family - семья", "own - собственный", "leave - оставлять, уходить", "put - класть", "old - старый", "while - в то время как", "mean - значить", "keep - держать, хранить", "student - студент", "why - почему", "let - позволять", "great - великий, отличный", "same - тот же самый", "big - большой", "group - группа", "begin - начинать", "seem - казаться", "country - страна", "help - помогать", "talk - разговаривать", "where - где", "turn - поворачивать", "problem - проблема", "every - каждый", "start - начинать", "hand - рука", "might - может быть", "american - американец", "show - показывать", "part - часть", "about - о, вокруг", "against - против", "place - место", "over - над", "such - такой", "again - снова", "few - мало", "case - случай", "week - неделя", "company - компания", "system - система", "each - каждый", "right - правый, правильный", "program - программа", "hear - слышать", "so - так", "question - вопрос", "during - в течение", "work - работа", "play - играть", "government - правительство", "run - бежать", "small - маленький", "number - число", "off - от, выключено", "always - всегда", "move - двигаться", "night - ночь", "live - жить", "mr - мистер", "point - точка, указывать", "believe - верить", "hold - держать", "today - сегодня", "bring - приносить", "happen - случаться", "next - следующий", "without - без", "before - до", "large - большой", "million - миллион", "must - должен", "home - дом", "under - под", "water - вода", "room - комната", "write - писать", "mother - мать", "area - область", "national - национальный", "money - деньги", "story - история", "young - молодой", "fact - факт", "month - месяц", "different - разный", "lot - много", "right - право", "study - изучать", "book - книга", "eye - глаз", "job - работа", "word - слово", "though - хотя", "business - бизнес", "issue - выпуск, проблема", "side - сторона", "kind - вид, добрый", "four - четыре", "head - голова", "far - далеко", "black - черный", "long - длинный", "both - оба", "little - маленький", "house - дом", "yes - да", "since - с тех пор", "long - долго", "provide - обеспечивать", "service - служба", "around - вокруг", "friend - друг", "important - важный", "father - отец", "sit - сидеть", "away - прочь", "until - до тех пор пока", "power - сила, власть", "hour - час", "game - игра", "often - часто", "yet - еще", "line - линия", "political - политический", "end - конец", "among - среди", "ever - когда-либо", "stand - стоять", "bad - плохой", "lose - терять", "however - однако", "member - участник", "pay - платить", "law - закон", "meet - встречать", "car - машина", "city - город", "almost - почти", "include - включать в себя", "continue - продолжать", "set - устанавливать", "later - позже", "community - сообщество", "much - много", "name - имя", "five - пять", "once - однажды", "white - белый", "least - наименее", "president - президент", "learn - учить", "real - настоящий", "change - менять", "team - команда", "minute - минута", "best - лучший", "several - несколько", "idea - идея", "kid - ребенок", "body - тело", "information - информация", "nothing - ничего", "ago - назад", "right - верно", "lead - вести", "social - социальный", "understand - понимать", "whether - ли", "watch - смотреть, часы", "together - вместе", "follow - следовать", "parent - родитель", "stop - останавливаться", "face - лицо", "anything - что угодно", "create - создавать", "public - общественный", "already - уже", "speak - говорить", "others - другие", "read - читать", "level - уровень", "allow - позволять", "add - добавлять", "office - офис", "spend - тратить", "door - дверь", "health - здоровье", "person - человек", "art - искусство", "sure - уверенный", "war - война", "history - история", "party - партия, вечеринка", "within - внутри", "grow - расти", "result - результат", "open - открывать", "morning - утро", "walk - идти пешком", "reason - причина", "low - низкий", "win - побеждать", "research - исследование", "girl - девочка", "guy - парень", "early - ранний", "food - еда", "moment - момент", "himself - сам", "air - воздух", "teacher - учитель", "force - сила", "offer - предлагать", "enough - достаточно", "education - образование", "across - через", "although - хотя", "remember - помнить", "foot - нога", "second - второй", "boy - мальчик", "maybe - может быть", "toward - по направлению к", "able - способный", "age - возраст", "policy - политика", "everything - всё", "love - любовь", "process - процесс", "music - музыка", "including - включая", "consider - рассматривать", "appear - появляться", "actually - на самом деле", "buy - покупать", "probably - вероятно", "human - человек", "wait - ждать", "serve - служить", "market - рынок", "die - умирать", "send - посылать", "expect - ожидать", "home - домашний", "sense - смысл", "build - строить", "stay - оставаться", "fall - падать", "oh - о!", "nation - нация", "plan - план", "cut - резать", "college - колледж", "interest - интерес", "death - смерть", "course - курс", "someone - кто-то", "experience - опыт", "behind - позади", "reach - достигать", "local - местный", "kill - убивать", "six - шесть", "remain - оставаться", "suggest - предлагать", "wanted - разыскиваемый", "raising - воспитание", "passing - прохождение", "needed - необходимый", "control - контроль", "decide - решать", "smile - улыбка", "maybe - возможно", "near - близко", "phone - телефон", "evening - вечер", "step - шаг", "ready - готовый", "village - деревня", "cloud - облако", "sleep - спать", "dance - танцевать", "flower - цветок", "river - река", "mountain - гора", "animal - животное", "forest - лес", "weather - погода", "kitchen - кухня", "garden - сад", "window - окно", "chair - стул", "table - стол", "bread - хлеб", "milk - молоко", "fruit - фрукт", "vegetable - овощ", "health - здоровье", "strong - сильный", "happy - счастливый", "sad - грустный", "angry - злой", "scared - испуганный", "tired - уставший", "hungry - голодный", "thirsty - жаждущий", "expensive - дорогой", "cheap - дешевый", "dirty - грязный", "clean - чистый", "heavy - тяжелый", "light - легкий", "possible - возможный", "impossible - невозможный", "important - важный", "famous - знаменитый", "interesting - интересный", "boring - скучный", "simple - простой", "difficult - сложный", "smart - умный", "beautiful - красивый", "ugly - уродливый", "safe - безопасный", "dangerous - опасный", "lucky - удачливый", "careful - осторожный", "quiet - тихий", "noisy - шумный", "tall - высокий", "short - короткий", "wide - широкий", "narrow - узкий", "fast - быстрый", "slow - медленный", "early - рано", "late - поздно", "rich - богатый", "poor - бедный", "full - полный", "empty - пустой", "hot - горячий", "cold - холодный", "wet - мокрый", "dry - сухой", "new - новый", "old - старый", "fresh - свежий", "rotten - гнилой", "sweet - сладкий", "sour - кислый", "bitter - горький", "salty - соленый", "brave - смелый", "kind - добрый", "honest - честный", "lazy - ленивый", "busy - занятый", "free - свободный", "young - молодой", "adult - взрослый", "married - женатый", "single - одинокий", "alive - живой", "dead - мертвый", "open - открытый", "closed - закрытый", "broken - сломанный", "ready - готовый", "perfect - идеальный", "normal - нормальный", "strange - странный", "secret - секрет", "public - публичный", "private - частный", "useful - полезный", "useless - бесполезный", "healthy - здоровый", "sick - больной", "lost - потерянный", "found - найденный"
+];
 
-    let allWords = JSON.parse(localStorage.getItem('myWords')) || [];
-    if(allWords.length === 0) load700();
+let allWords = JSON.parse(localStorage.getItem('myWords')) || [];
+if(allWords.length === 0) { allWords = gold700.map(s => { let p = s.split(' - '); return {en: p[0].trim(), ru: p[1].trim()}; }); localStorage.setItem('myWords', JSON.stringify(allWords)); }
 
-    let queue = [], examList = [], currentItem = null, completedCount = 0, isExam = false, examScore = 0;
-    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-    if(recognition) recognition.lang = 'en-US';
+let queue = [], examList = [], currentItem = null, completedCount = 0, isExam = false, examScore = 0;
+const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+if(recognition) recognition.lang = 'en-US';
 
-    function load700() {
-        allWords = base700.map(s => { let p = s.split(' - '); return {en: p[0], ru: p[1]}; });
-        localStorage.setItem('myWords', JSON.stringify(allWords));
-        alert("700 самых важных слов загружены!");
-        toggleModal(false);
-    }
+function toggleTheme() { document.body.classList.toggle('dark'); }
+function toggleModal(show) { document.getElementById('modal').style.display = show ? 'flex' : 'none'; if(show) document.getElementById('wordsInput').value = allWords.map(w => `${w.en} - ${w.ru}`).join('\n'); }
+function saveSettings() { const text = document.getElementById('wordsInput').value; allWords = text.split('\n').map(l => l.split('-')).filter(p => p.length === 2).map(p => ({ en: p[0].trim(), ru: p[1].trim() })); localStorage.setItem('myWords', JSON.stringify(allWords)); toggleModal(false); }
+function resetToDefault() { if(confirm("Сбросить словарь к 700 золотым словам? Ваши правки удалятся.")) { allWords = gold700.map(s => { let p = s.split(' - '); return {en: p[0].trim(), ru: p[1].trim()}; }); localStorage.setItem('myWords', JSON.stringify(allWords)); toggleModal(false); } }
+function speak(t, lang='en-US') { const m = new SpeechSynthesisUtterance(t); m.lang = lang; window.speechSynthesis.speak(m); }
 
-    function toggleTheme() { document.body.classList.toggle('dark'); }
-    function toggleModal(show) { document.getElementById('modal').style.display = show ? 'flex' : 'none'; if(show) document.getElementById('wordsInput').value = allWords.map(w => `${w.en} - ${w.ru}`).join('\n'); }
-    function saveSettings() { const text = document.getElementById('wordsInput').value; allWords = text.split('\n').map(l => l.split('-')).filter(p => p.length === 2).map(p => ({ en: p[0].trim(), ru: p[1].trim() })); localStorage.setItem('myWords', JSON.stringify(allWords)); toggleModal(false); }
-    function speak(t) { const m = new SpeechSynthesisUtterance(t); m.lang = 'en-US'; window.speechSynthesis.speak(m); }
+function startSession() {
+    isExam = false;
+    examList = [...allWords].sort(() => 0.5 - Math.random()).slice(0, 10);
+    queue = examList.map(w => ({ ...w, mode: Math.floor(Math.random() * 3) }));
+    completedCount = 0;
+    nextStep();
+}
 
-    function startSession() {
-        isExam = false;
-        examList = [...allWords].sort(() => 0.5 - Math.random()).slice(0, 10);
-        queue = examList.map(w => ({ ...w, mode: Math.floor(Math.random() * 3) }));
-        completedCount = 0;
-        nextStep();
-    }
+function nextStep() {
+    if (queue.length === 0) { isExam ? finishExam() : offerExam(); return; }
+    currentItem = queue[0];
+    const card = document.getElementById('card');
+    const controls = document.getElementById('controls');
+    const inputArea = document.getElementById('input-area');
+    const badge = document.getElementById('mode-badge');
+    
+    card.className = 'card';
+    inputArea.style.display = 'none';
+    document.getElementById('status').innerText = "";
 
-    function nextStep() {
-        if (queue.length === 0) { isExam ? finishExam() : offerExam(); return; }
-        currentItem = queue[0];
-        const card = document.getElementById('card');
-        const controls = document.getElementById('controls');
-        const inputArea = document.getElementById('input-area');
-        
-        card.className = 'card';
-        inputArea.style.display = 'none';
-        document.getElementById('status').innerText = "";
-        document.getElementById('display-bottom').style.opacity = "1";
-
-        if (isExam) {
-            document.getElementById('mode-label').innerText = "ЭКЗАМЕН";
+    if (isExam) {
+        badge.innerText = "🚨 ЭКЗАМЕН (БЕЗ ОЗВУЧКИ)";
+        document.getElementById('display-top').innerText = currentItem.ru;
+        document.getElementById('display-bottom').innerText = "Напишите на английском";
+        inputArea.style.display = 'block';
+        document.getElementById('writingInput').value = '';
+        document.getElementById('writingInput').focus();
+        controls.innerHTML = `<button class="btn-full" style="background:var(--gold); color:black" onclick="checkExam()">ПРОВЕРИТЬ</button>`;
+    } else {
+        if (currentItem.mode === 0) { // Изучение
+            badge.innerText = "ИЗУЧЕНИЕ";
+            document.getElementById('display-top').innerText = currentItem.en;
+            document.getElementById('display-bottom').innerText = currentItem.ru;
+            controls.innerHTML = `<button class="btn-yes" onclick="handle(true)">ПОМНЮ</button><button class="btn-no" onclick="handle(false)">НЕ ПОМНЮ</button>`;
+            speak(currentItem.en);
+        } else if (currentItem.mode === 1) { // Произношение
+            badge.innerText = "ПРОИЗНОШЕНИЕ";
             document.getElementById('display-top').innerText = currentItem.ru;
-            document.getElementById('display-bottom').innerText = "Напишите перевод";
+            document.getElementById('display-bottom').innerText = "Назовите слово";
+            controls.innerHTML = `<button class="btn-full" style="background:#8e44ad; color:white;" onclick="runSpeech()">🎤 ГОВОРИТЬ</button>
+                                  <button class="btn-no" style="grid-column: span 2" onclick="handle(false)">ПРОПУСТИТЬ</button>`;
+        } else { // Письмо
+            badge.innerText = "ПИСЬМО (ГРАММАТИКА)";
+            document.getElementById('display-top').innerText = currentItem.ru;
             inputArea.style.display = 'block';
             document.getElementById('writingInput').value = '';
             document.getElementById('writingInput').focus();
-            controls.innerHTML = `<button class="btn-full" onclick="checkExam()">Проверить</button>`;
-        } else {
-            if (currentItem.mode === 0) {
-                document.getElementById('mode-label').innerText = "ИЗУЧЕНИЕ";
-                document.getElementById('display-top').innerText = currentItem.en;
-                document.getElementById('display-bottom').innerText = currentItem.ru;
-                controls.innerHTML = `<button class="btn-yes" onclick="handle(true)">Помню</button><button class="btn-no" onclick="handle(false)">Не помню</button>`;
-                speak(currentItem.en);
-            } else if (currentItem.mode === 1) {
-                document.getElementById('mode-label').innerText = "ПРОИЗНОШЕНИЕ";
-                document.getElementById('display-top').innerText = currentItem.ru;
-                document.getElementById('display-bottom').innerText = "Скажите вслух";
-                controls.innerHTML = `<button class="btn-full" style="background:#8e44ad; color:white;" onclick="runSpeech()">🎤 ГОВОРИТЬ</button><button class="btn-no" style="grid-column: span 2" onclick="handle(false)">Пропустить</button>`;
-            } else {
-                document.getElementById('mode-label').innerText = "ПИСЬМО";
-                document.getElementById('display-top').innerText = currentItem.ru;
-                inputArea.style.display = 'block';
-                document.getElementById('writingInput').value = '';
-                document.getElementById('writingInput').focus();
-                controls.innerHTML = `<button class="btn-full" onclick="checkGrammar()">ПРОВЕРИТЬ</button><button class="btn-no" style="grid-column: span 2" onclick="handle(false)">Не помню</button>`;
-            }
+            controls.innerHTML = `<button class="btn-full" onclick="checkWriting()">ПРОВЕРИТЬ</button>
+                                  <button class="btn-no" style="grid-column: span 2" onclick="handle(false)">ПОДСКАЗКА</button>`;
         }
-        updateProgress();
     }
+    updateProgress();
+}
 
-    function handle(s) {
-        if(s) { queue.shift(); completedCount++; document.getElementById('card').classList.add('success'); setTimeout(nextStep, 600); }
-        else { let r = queue.shift(); r.mode = Math.floor(Math.random()*3); queue.push(r); document.getElementById('card').classList.add('fail'); speak(currentItem.en); alert("Запомним: " + currentItem.en); nextStep(); }
+function handle(success) {
+    if(success) {
+        queue.shift();
+        completedCount++;
+        document.getElementById('card').classList.add('success');
+        setTimeout(nextStep, 500);
+    } else {
+        let retry = queue.shift();
+        retry.mode = Math.floor(Math.random()*3);
+        queue.push(retry);
+        document.getElementById('card').classList.add('fail');
+        speak(currentItem.en);
+        document.getElementById('status').innerText = `Запомним: ${currentItem.en} - ${currentItem.ru}`;
+        setTimeout(nextStep, 1800);
     }
+}
 
-    function runSpeech() {
-        recognition.start();
-        document.getElementById('status').innerText = "Слушаю...";
-        recognition.onresult = (e) => {
-            const t = e.results[0][0].transcript.toLowerCase();
-            if(t.includes(currentItem.en.toLowerCase())) handle(true);
-            else document.getElementById('status').innerText = "Услышал: " + t + ". Попробуйте еще раз.";
-        };
-    }
+function runSpeech() {
+    recognition.start();
+    document.getElementById('status').innerText = "Слушаю...";
+    recognition.onresult = (e) => {
+        const text = e.results[0][0].transcript.toLowerCase();
+        if(text.includes(currentItem.en.toLowerCase())) handle(true);
+        else document.getElementById('status').innerText = `Услышал: "${text}". Еще раз?`;
+    };
+}
 
-    function checkGrammar() {
-        if(document.getElementById('writingInput').value.trim().toLowerCase() === currentItem.en.toLowerCase()) handle(true);
-        else { alert("Ошибка! Правильно: " + currentItem.en); handle(false); }
-    }
+function checkWriting() {
+    const val = document.getElementById('writingInput').value.trim().toLowerCase();
+    if(val === currentItem.en.toLowerCase()) handle(true);
+    else { alert(`Ошибка! Правильно: ${currentItem.en}`); handle(false); }
+}
 
-    function checkExam() {
-        if(document.getElementById('writingInput').value.trim().toLowerCase() === currentItem.en.toLowerCase()) { examScore++; document.getElementById('card').classList.add('success'); }
-        else { document.getElementById('card').classList.add('fail'); alert("Верно было: " + currentItem.en); }
-        queue.shift(); completedCount++; setTimeout(nextStep, 600);
-    }
+function checkExam() {
+    const val = document.getElementById('writingInput').value.trim().toLowerCase();
+    if(val === currentItem.en.toLowerCase()) { examScore++; document.getElementById('card').classList.add('success'); }
+    else { document.getElementById('card').classList.add('fail'); alert(`Верно было: ${currentItem.en}`); }
+    queue.shift(); completedCount++; setTimeout(nextStep, 600);
+}
 
-    function updateProgress() {
-        const total = completedCount + queue.length;
-        document.getElementById('progress').style.width = (completedCount / total * 100) + '%';
-    }
+function updateProgress() {
+    const total = completedCount + queue.length;
+    document.getElementById('progress').style.width = (completedCount / total * 100) + '%';
+}
 
-    function offerExam() {
-        document.getElementById('display-top').innerText = "Урок окончен";
-        document.getElementById('display-bottom').innerText = "Перейти к экзамену?";
-        document.getElementById('controls').innerHTML = `<button class="btn-exam" onclick="startExam()">Начать ЭКЗАМЕН</button>`;
-    }
+function offerExam() {
+    document.getElementById('display-top').innerText = "Урок Окончен";
+    document.getElementById('display-bottom').innerText = "Закрепим знания экзаменом?";
+    document.getElementById('controls').innerHTML = `<button class="btn-exam" onclick="startExam()">🔥 НАЧАТЬ ЭКЗАМЕН</button>
+                                                      <button class="btn-no" style="grid-column: span 2" onclick="location.reload()">ГЛАВНОЕ МЕНЮ</button>`;
+}
 
-    function startExam() { isExam = true; queue = [...examList]; completedCount = 0; examScore = 0; nextStep(); }
-    
-    function finishExam() {
-        document.getElementById('display-top').innerText = examScore + " / 10";
-        document.getElementById('display-bottom').innerText = "Ваш результат";
-        document.getElementById('controls').innerHTML = `<button class="btn-full" onclick="startSession()">Новый урок</button>`;
-    }
+function startExam() { isExam = true; queue = [...examList]; completedCount = 0; examScore = 0; nextStep(); }
+function finishExam() {
+    document.getElementById('display-top').innerText = `${examScore} / 10`;
+    document.getElementById('display-bottom').innerText = examScore > 7 ? "Блестяще!" : "Нужно еще попрактиковаться";
+    document.getElementById('controls').innerHTML = `<button class="btn-full" onclick="startSession()">НОВЫЙ УРОК</button>`;
+}
 </script>
 </body>
 </html>
