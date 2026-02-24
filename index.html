@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English 700 Gold</title>
+    <style>
+        :root { --bg: #f0f4f8; --card: #ffffff; --text: #2c3e50; --accent: #27ae60; --error: #e74c3c; --blue: #3498db; --gold: #f1c40f; }
+        body.dark { --bg: #1a1a2e; --card: #16213e; --text: #e9e9e9; --accent: #0f9d58; }
+        
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; padding: 20px; transition: 0.3s; }
+        .container { max-width: 550px; width: 100%; text-align: center; }
+        
+        .progress-container { width: 100%; height: 12px; background: #dcdde1; border-radius: 6px; margin-bottom: 10px; overflow: hidden; }
+        .progress-bar { height: 100%; width: 0%; background: var(--accent); transition: 0.5s; }
+        
+        .card { background: var(--card); padding: 40px; border-radius: 25px; box-shadow: 0 12px 30px rgba(0,0,0,0.2); min-height: 300px; display: flex; flex-direction: column; justify-content: center; border: 4px solid transparent; transition: 0.3s; margin-bottom: 20px; }
+        .word-main { font-size: 48px; font-weight: bold; color: var(--blue); }
+        .word-sub { font-size: 32px; color: #7f8c8d; margin-top: 10px; }
+
+        input[type="text"] { width: 90%; padding: 15px; font-size: 24px; border-radius: 12px; border: 2px solid #bdc3c7; text-align: center; background: var(--card); color: var(--text); }
+        
+        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        button { padding: 20px; font-size: 18px; border-radius: 15px; border: none; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .btn-full { grid-column: span 2; background: var(--blue); color: white; }
+        .btn-yes { background: var(--accent); color: white; }
+        .btn-no { background: #95a5a6; color: white; }
+        .btn-exam { background: var(--gold); color: black; grid-column: span 2; }
+        
+        .top-nav { display: flex; justify-content: space-between; margin-bottom: 15px; }
+        .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); align-items:center; justify-content:center; z-index:100; }
+        .modal-content { background:var(--card); padding:30px; border-radius:20px; width:90%; color: var(--text); }
+        textarea { width:100%; height:200px; background: #f9f9f9; padding: 10px; box-sizing: border-box; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="top-nav">
+        <button onclick="toggleTheme()" style="padding: 10px; font-size: 14px; background: #95a5a6;">🌓 Тема</button>
+        <div id="mode-label" style="font-weight: bold; padding: 10px;">ГОТОВ</div>
+        <button onclick="toggleModal(true)" style="padding: 10px; font-size: 14px; background: #95a5a6;">⚙️ Слова</button>
+    </div>
+
+    <div class="progress-container"><div id="progress" class="progress-bar"></div></div>
+    
+    <div class="card" id="card">
+        <div id="display-top" class="word-main">English</div>
+        <div id="display-bottom" class="word-sub">700 слов</div>
+        <div id="input-area" style="display:none;"><input type="text" id="writingInput" autocomplete="off"></div>
+    </div>
+
+    <div class="controls" id="controls">
+        <button class="btn-full" onclick="startSession()">Начать урок (10 слов)</button>
+    </div>
+    
+    <div id="status" style="margin-top:20px; font-weight:bold;"></div>
+</div>
+
+<div id="modal" class="modal">
+    <div class="modal-content">
+        <h3>Ваш словарь</h3>
+        <textarea id="wordsInput"></textarea>
+        <button class="btn-yes" onclick="saveSettings()" style="width:100%">Сохранить</button>
+        <button class="btn-no" onclick="load700()" style="width:100%; margin-top:10px; background: var(--blue);">Загрузить 700 слов</button>
+        <button class="btn-no" onclick="toggleModal(false)" style="width:100%; margin-top:10px;">Закрыть</button>
+    </div>
+</div>
+
+<script>
+    // Массив из топ-700 слов (сокращенно для примера, расширен до основных категорий)
+    const base700 = [
+        "time - время", "year - год", "people - люди", "way - путь", "day - день", "man - мужчина", "thing - вещь", "woman - женщина", "life - жизнь", "child - ребенок", "world - мир", "school - школа", "state - государство", "family - семья", "student - студент", "group - группа", "country - страна", "problem - проблема", "hand - рука", "part - часть", "place - место", "case - случай", "week - неделя", "company - компания", "system - система", "program - программа", "question - вопрос", "work - работа", "government - правительство", "number - число", "night - ночь", "point - точка", "home - дом", "water - вода", "room - комната", "mother - мать", "area - область", "money - деньги", "story - история", "fact - факт", "month - месяц", "lot - лот", "right - право", "study - изучение", "book - книга", "eye - глаз", "job - работа", "word - слово", "business - бизнес", "issue - проблема", "side - сторона", "kind - вид", "head - голова", "house - дом", "service - служба", "friend - друг", "father - отец", "power - власть", "hour - час", "game - игра", "line - линия", "end - конец", "member - участник", "law - закон", "car - машина", "city - город", "community - сообщество", "name - имя", "team - команда", "minute - минута", "idea - идея", "kid - ребенок", "body - тело", "information - информация", "back - спина", "parent - родитель", "face - лицо", "others - другие", "level - уровень", "office - офис", "door - дверь", "health - здоровье", "person - человек", "art - искусство", "war - война", "history - история", "party - вечеринка", "result - результат", "change - изменение", "morning - утро", "reason - причина", "low - низкий", "win - побеждать", "shop - магазин"
+        // ... (в реальном приложении здесь будет полный список строк)
+    ];
+
+    let allWords = JSON.parse(localStorage.getItem('myWords')) || [];
+    if(allWords.length === 0) load700();
+
+    let queue = [], examList = [], currentItem = null, completedCount = 0, isExam = false, examScore = 0;
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    if(recognition) recognition.lang = 'en-US';
+
+    function load700() {
+        allWords = base700.map(s => { let p = s.split(' - '); return {en: p[0], ru: p[1]}; });
+        localStorage.setItem('myWords', JSON.stringify(allWords));
+        alert("700 самых важных слов загружены!");
+        toggleModal(false);
+    }
+
+    function toggleTheme() { document.body.classList.toggle('dark'); }
+    function toggleModal(show) { document.getElementById('modal').style.display = show ? 'flex' : 'none'; if(show) document.getElementById('wordsInput').value = allWords.map(w => `${w.en} - ${w.ru}`).join('\n'); }
+    function saveSettings() { const text = document.getElementById('wordsInput').value; allWords = text.split('\n').map(l => l.split('-')).filter(p => p.length === 2).map(p => ({ en: p[0].trim(), ru: p[1].trim() })); localStorage.setItem('myWords', JSON.stringify(allWords)); toggleModal(false); }
+    function speak(t) { const m = new SpeechSynthesisUtterance(t); m.lang = 'en-US'; window.speechSynthesis.speak(m); }
+
+    function startSession() {
+        isExam = false;
+        examList = [...allWords].sort(() => 0.5 - Math.random()).slice(0, 10);
+        queue = examList.map(w => ({ ...w, mode: Math.floor(Math.random() * 3) }));
+        completedCount = 0;
+        nextStep();
+    }
+
+    function nextStep() {
+        if (queue.length === 0) { isExam ? finishExam() : offerExam(); return; }
+        currentItem = queue[0];
+        const card = document.getElementById('card');
+        const controls = document.getElementById('controls');
+        const inputArea = document.getElementById('input-area');
+        
+        card.className = 'card';
+        inputArea.style.display = 'none';
+        document.getElementById('status').innerText = "";
+        document.getElementById('display-bottom').style.opacity = "1";
+
+        if (isExam) {
+            document.getElementById('mode-label').innerText = "ЭКЗАМЕН";
+            document.getElementById('display-top').innerText = currentItem.ru;
+            document.getElementById('display-bottom').innerText = "Напишите перевод";
+            inputArea.style.display = 'block';
+            document.getElementById('writingInput').value = '';
+            document.getElementById('writingInput').focus();
+            controls.innerHTML = `<button class="btn-full" onclick="checkExam()">Проверить</button>`;
+        } else {
+            if (currentItem.mode === 0) {
+                document.getElementById('mode-label').innerText = "ИЗУЧЕНИЕ";
+                document.getElementById('display-top').innerText = currentItem.en;
+                document.getElementById('display-bottom').innerText = currentItem.ru;
+                controls.innerHTML = `<button class="btn-yes" onclick="handle(true)">Помню</button><button class="btn-no" onclick="handle(false)">Не помню</button>`;
+                speak(currentItem.en);
+            } else if (currentItem.mode === 1) {
+                document.getElementById('mode-label').innerText = "ПРОИЗНОШЕНИЕ";
+                document.getElementById('display-top').innerText = currentItem.ru;
+                document.getElementById('display-bottom').innerText = "Скажите вслух";
+                controls.innerHTML = `<button class="btn-full" style="background:#8e44ad; color:white;" onclick="runSpeech()">🎤 ГОВОРИТЬ</button><button class="btn-no" style="grid-column: span 2" onclick="handle(false)">Пропустить</button>`;
+            } else {
+                document.getElementById('mode-label').innerText = "ПИСЬМО";
+                document.getElementById('display-top').innerText = currentItem.ru;
+                inputArea.style.display = 'block';
+                document.getElementById('writingInput').value = '';
+                document.getElementById('writingInput').focus();
+                controls.innerHTML = `<button class="btn-full" onclick="checkGrammar()">ПРОВЕРИТЬ</button><button class="btn-no" style="grid-column: span 2" onclick="handle(false)">Не помню</button>`;
+            }
+        }
+        updateProgress();
+    }
+
+    function handle(s) {
+        if(s) { queue.shift(); completedCount++; document.getElementById('card').classList.add('success'); setTimeout(nextStep, 600); }
+        else { let r = queue.shift(); r.mode = Math.floor(Math.random()*3); queue.push(r); document.getElementById('card').classList.add('fail'); speak(currentItem.en); alert("Запомним: " + currentItem.en); nextStep(); }
+    }
+
+    function runSpeech() {
+        recognition.start();
+        document.getElementById('status').innerText = "Слушаю...";
+        recognition.onresult = (e) => {
+            const t = e.results[0][0].transcript.toLowerCase();
+            if(t.includes(currentItem.en.toLowerCase())) handle(true);
+            else document.getElementById('status').innerText = "Услышал: " + t + ". Попробуйте еще раз.";
+        };
+    }
+
+    function checkGrammar() {
+        if(document.getElementById('writingInput').value.trim().toLowerCase() === currentItem.en.toLowerCase()) handle(true);
+        else { alert("Ошибка! Правильно: " + currentItem.en); handle(false); }
+    }
+
+    function checkExam() {
+        if(document.getElementById('writingInput').value.trim().toLowerCase() === currentItem.en.toLowerCase()) { examScore++; document.getElementById('card').classList.add('success'); }
+        else { document.getElementById('card').classList.add('fail'); alert("Верно было: " + currentItem.en); }
+        queue.shift(); completedCount++; setTimeout(nextStep, 600);
+    }
+
+    function updateProgress() {
+        const total = completedCount + queue.length;
+        document.getElementById('progress').style.width = (completedCount / total * 100) + '%';
+    }
+
+    function offerExam() {
+        document.getElementById('display-top').innerText = "Урок окончен";
+        document.getElementById('display-bottom').innerText = "Перейти к экзамену?";
+        document.getElementById('controls').innerHTML = `<button class="btn-exam" onclick="startExam()">Начать ЭКЗАМЕН</button>`;
+    }
+
+    function startExam() { isExam = true; queue = [...examList]; completedCount = 0; examScore = 0; nextStep(); }
+    
+    function finishExam() {
+        document.getElementById('display-top').innerText = examScore + " / 10";
+        document.getElementById('display-bottom').innerText = "Ваш результат";
+        document.getElementById('controls').innerHTML = `<button class="btn-full" onclick="startSession()">Новый урок</button>`;
+    }
+</script>
+</body>
+</html>
